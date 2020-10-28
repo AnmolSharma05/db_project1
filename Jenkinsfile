@@ -18,14 +18,10 @@ pipeline {
   stage('Build Image') {
    steps {
     script {
-     if (isMaster()) {
       dockerImage = docker.build "$registry:latest"
-     } else {
-      dockerImage = docker.build "$registry:${params.RELEASE_TAG}"
-     }
+     } 
     }
    }
-  }
 
   stage('Deploy Image') {
    steps {
