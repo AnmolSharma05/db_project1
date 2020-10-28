@@ -13,19 +13,7 @@ pipeline {
 
  agent any
 
- parameters {
-  gitParameter name: 'RELEASE_TAG',
-   type: 'PT_TAG',
-   defaultValue: 'master'
- }
-
  stages {
-
-  stage('Basic Information') {
-   steps {
-    sh "echo tag: ${params.RELEASE_TAG}"
-   }
-  }
 
   stage('Build Image') {
    steps {
