@@ -8,7 +8,7 @@ pipeline {
   appName = "server"
   registry = "7891486294/django-server"
   registryCredential = "7891486294"
-  projectPath = "/jenkins/data/workspace/django-server"
+  projectPath = "/jenkins/data/workspace/project"
  }
 
  agent any
