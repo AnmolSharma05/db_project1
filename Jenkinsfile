@@ -39,47 +39,6 @@ pipeline {
    }
   }
 
-  stage('Check Lint') {
-   steps {
-    sh "docker run --rm $registry:${params.RELEASE_TAG} flake8"
-   }
-  }
-
-  stage('Run Tests') {
-   steps {
-    sh "docker run -v $projectPath/reports:/app/reports  --rm --network='host' --env-file=.test.env $registry:${params.RELEASE_TAG} coverage run -m pytest --verbose --junit-xml reports/results.xml"
-   }
-   post {
-    always {
-     // Archive unit tests for the future
-     junit allowEmptyResults: true, testResults: 'reports/results.xml'
-    }
-   }
-  }
-
-  stage('Calculate Coverage') {
-   steps {
-    echo "Code Coverage"
-    sh "docker run -v $projectPath/reports:/app/reports --rm --network='host' --env-file=.test.env $registry:${params.RELEASE_TAG} coverage xml -o reports/coverage.xml"
-   }
-   post {
-    always {
-     step([$class: 'CoberturaPublisher',
-      autoUpdateHealth: false,
-      autoUpdateStability: false,
-      coberturaReportFile: 'reports/coverage.xml',
-      failUnhealthy: false,
-      failUnstable: false,
-      maxNumberOfBuilds: 0,
-      onlyStable: false,
-      sourceEncoding: 'ASCII',
-      zoomCoverageChart: false
-     ])
-
-    }
-   }
-  }
-
   stage('Deploy Image') {
    steps {
     script {
@@ -89,32 +48,6 @@ pipeline {
     }
    }
   }
-
-  stage('Notify Telegram') {
-   steps() {
-    script {
-      telegram.sendTelegram("Build successful for ${getBuildName()}\n" +
-      "image $registry:${params.RELEASE_TAG} is pushed to DockerHub and ready to be deployed")
-    }
-   }
-  }
-
-  stage('Garbage Collection') {
-   steps {
-    sh "docker rmi $registry:${params.RELEASE_TAG}"
-   }
-  }
- }
-
- post {
-  failure {
-   script {
-    telegram.sendTelegram("Build failed for ${getBuildName()}\n" +
-     "Checkout Jenkins console for more information. If you are not a developer simply ignore this message.")
-   }
-  }
- }
-
 }
 
 def getBuildName() {
