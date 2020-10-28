@@ -1,17 +1,32 @@
 FROM python:3
 
-ENV PYTHONUNBUFFERED 1
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    gcc \
+    gettext
 
-ENV PORT 8080
+# Requirements are installed here to ensure they will be cached.
+COPY ./requirements.txt /requirements.txt
+RUN pip install --no-cache-dir --default-timeout=200 -r /requirements.txt \
+    && rm -rf /requirements.txt
 
-RUN mkdir /code
+COPY ./entrypoint.sh /entrypoint
+RUN sed -i 's/\r$//g' /entrypoint
+RUN chmod +x /entrypoint
+
+COPY ./start-django.sh /start-django
+RUN sed -i 's/\r$//g' /start-django
+RUN chmod +x /start-django
+
+COPY . /app
+
+COPY config/nginx/default /etc/nginx/sites-available/default
+COPY config/nginx/nginx.conf /etc/nginx/nginx.conf
 
 WORKDIR /app
 
-ADD . /app
+EXPOSE 80/tcp 443/tcp
 
-COPY ./requirements.txt /app/requirements.txt
+ENTRYPOINT ["/entrypoint"]
 
-RUN pip install -r requirements.txt
-
-COPY . /app
+CMD ["sh" , "/start-django"]
