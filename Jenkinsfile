@@ -1,6 +1,6 @@
 library identifier: 'jenkins-shared@master', retriever: modernSCM(
  [$class: 'GitSCMSource',
-  remote: 'https://github.com/MobodidTech/jenkins-shared.git',
+  remote: 'https://github.com/AnmolSharma05/db_project.git',
  ])
 
 pipeline {
